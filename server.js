@@ -3,6 +3,9 @@ const express = require('express');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
 const passport = require('passport');
+const compress = require('compression');
+const helmet = require('helmet');
+const cors = require('cors');
 // config
 const { PORT, MONGODB_URI } = require('./config');
 // auth strategies
@@ -24,6 +27,12 @@ app.use(morgan(process.env.NODE_ENV === 'development' ? 'dev' : 'common', {
   skip: () => process.env.NODE_ENV === 'test'
 }));
 
+
+app.use(helmet());
+app.use(cors({
+  origin: 'http://localhost:3000'
+}));
+app.use(compress());
 // Parse request body
 app.use(express.json());
 
@@ -33,7 +42,7 @@ passport.use(jwtStrategy);
 
 // Mount routers
 app.use('/api', authRouter);
-app.use('/api', usersRouter);
+app.use('/api/users', usersRouter);
 app.use('/api/notes', notesRouter);
 app.use('/api/folders', foldersRouter);
 app.use('/api/tags', tagsRouter);

@@ -24,7 +24,13 @@ describe('Tag Router Tests', () => {
           useNewUrlParser: true
         }
       )
-      .then(() => mongoose.connection.db.dropDatabase());
+      .then(() => {
+        return Promise.all([
+          User.deleteMany({}),
+          Tag.deleteMany({}),
+          Tag.createIndexes()
+        ]);
+      });
   });
 
   let token;
@@ -46,7 +52,10 @@ describe('Tag Router Tests', () => {
   });
 
   afterEach(function() {
-    return mongoose.connection.db.dropDatabase();
+    return Promise.all([
+      User.deleteMany({}),
+      Tag.deleteMany({})
+    ]);
   });
 
   after(function() {

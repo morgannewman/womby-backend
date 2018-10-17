@@ -16,27 +16,34 @@ const { users } = require('../db/data');
 
 const expect = chai.expect;
 chai.use(chaiHttp);
-
 describe('Folder Router Tests', () => {
   before(function() {
     return mongoose
-      .connect(
-        TEST_MONGODB_URI,
-        { useNewUrlParser: true }
+    .connect(
+      TEST_MONGODB_URI,
+      { useNewUrlParser: true }
       )
-      .then(() => mongoose.connection.db.dropDatabase());
+      .then(() => {
+        // Remove all items instead of dropping DB
+        // Create indexes
+        return Promise.all([
+          User.deleteMany({}),
+          Folder.deleteMany({})
+        ])
+        .then(() => Folder.createIndexes());
+      });
   });
 
   let token;
   let user;
   beforeEach(function() {
     return Promise.all(users.map(user => User.hashPassword(user.password)))
-      .then(digests => {
-        users.forEach((user, i) => (user.password = digests[i]));
-        return Promise.all([
+    .then(digests => {
+      users.forEach((user, i) => (user.password = digests[i]));
+      // Add all items
+      return Promise.all([
           User.insertMany(users),
           Folder.insertMany(folders),
-          Folder.createIndexes()
         ]);
       })
       .then(([users]) => {
@@ -44,11 +51,14 @@ describe('Folder Router Tests', () => {
         token = jwt.sign({ user }, JWT_SECRET, { subject: user.email });
       });
   });
-
   afterEach(function() {
-    return mongoose.connection.db.dropDatabase();
+    // Remove all items
+    return Promise.all([
+      User.deleteMany({}),
+      Folder.deleteMany({})
+    ]);
   });
-
+  
   after(function() {
     return mongoose.disconnect();
   });

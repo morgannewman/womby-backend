@@ -53,7 +53,7 @@ const validateId = (req, res, next) => {
  * are 24 digit hex numbers and exist in the database.
  * @throws 400 error - Invalid `folderId` or `parent` in request body.
  * @throws 404 error - `folderId` or `parent` in request body does not exist.
- */ 
+ */
 const validateFolderId = (req, res, next) => {
   if (!(req.body.folderId || req.body.parent)) return next();
   const userId = req.user.id;
@@ -65,8 +65,14 @@ const validateFolderId = (req, res, next) => {
     err.status = 400;
     return next(err);
   }
-  // Step 2: Check to see folder exists in DB
-  return Folder.find({ _id: id, userId }).count()
+  // Step 2: Check to make sure the req.body.parent ID !== the id
+  if (req.body.parent === req.body.id) {
+    const err = new Error('`parent` cannot point to itself.');
+    err.status = 400;
+    return next(err);
+  }
+  // Step 3: Check to see folder exists in DB
+  Folder.find({ _id: id, userId }).count()
     .then(dbRes => {
       if (dbRes < 1) {
         const err = new Error('`folderId` or `parent` in request body does not exist.');
@@ -107,7 +113,7 @@ const validateTagId = (req, res, next) => {
   if (req.method === 'GET' || req.method === 'DELETE') return next();
   // Check to see if all tags being used exist
   const userId = req.user.id;
-  return Tag.find({ _id: {$in: req.body.tags}, userId }).count()
+  return Tag.find({ _id: { $in: req.body.tags }, userId }).count()
     .then(tagCount => {
       if (tagCount !== tagsLength) {
         const err = new Error('An id in `tags` does not exist.');
@@ -144,9 +150,9 @@ const validateUser = (req, res, next) => {
     return next(err);
   }
   // Require no leading or trailing whitespace
-  if(email[0] === ' ' || 
-    email[email.length - 1] === ' ' || 
-    password[0] === ' ' || 
+  if (email[0] === ' ' ||
+    email[email.length - 1] === ' ' ||
+    password[0] === ' ' ||
     password[password.length - 1] === ' ') {
     const err = new Error('email and password cannot begin or end with a space.');
     err.status = 400;
@@ -170,4 +176,4 @@ const validateMatchingIds = (req, res, next) => {
   return next();
 }
 
-module.exports = {requireFields, validateTagId, validateFolderId, validateId, validateMatchingIds, validateUser};
+module.exports = { requireFields, validateTagId, validateFolderId, validateId, validateMatchingIds, validateUser };

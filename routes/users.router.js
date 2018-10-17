@@ -3,7 +3,7 @@ const User = require('../models/user');
 const { constructLocationHeader } = require('../middleware/helpers');
 const { requireFields, validateUser } = require('../middleware/validate');
 
-router.post('/users', requireFields(['email', 'password', 'firstName', 'lastName'], 422), validateUser, (req, res, next) => {
+router.post('/', requireFields(['email', 'password', 'firstName', 'lastName'], 422), validateUser, (req, res, next) => {
   const possibleFields = ['email', 'password', 'firstName', 'lastName'];
   const newUser = {};
   for (const field of possibleFields) {

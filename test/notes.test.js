@@ -22,7 +22,13 @@ describe('Note Router Tests', () => {
         TEST_MONGODB_URI,
         { useNewUrlParser: true }
       )
-      .then(() => mongoose.connection.db.dropDatabase());
+      .then(() => {
+        return Promise.all([
+          User.deleteMany({}),
+          Note.deleteMany({}),
+          Note.createIndexes()
+        ]);
+      });
   });
 
   let user;
@@ -33,8 +39,7 @@ describe('Note Router Tests', () => {
         users.forEach((user, i) => (user.password = digests[i]));
         return Promise.all([
           User.insertMany(users),
-          Note.insertMany(notes),
-          Note.createIndexes()
+          Note.insertMany(notes)
         ]);
       })
       .then(([users]) => {
@@ -44,13 +49,16 @@ describe('Note Router Tests', () => {
   });
 
   afterEach(function() {
-    return mongoose.connection.db.dropDatabase();
-  });
+    return Promise.all([
+      User.deleteMany({}),
+      Note.deleteMany({})
+    ]);
+});
 
   after(function() {
     return mongoose.disconnect();
   });
-
+  
   const req = (method, endpoint) => {
     method = method.toLowerCase();
     return chai
