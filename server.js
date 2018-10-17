@@ -2,25 +2,41 @@
 const express = require('express');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
+const passport = require('passport');
 // config
 const { PORT, MONGODB_URI } = require('./config');
 // auth strategies
+const localStrategy = require('./passport/local');
+const jwtStrategy = require('./passport/jwt');
+
 // routers
+const notesRouter = require('./routes/notes.router');
+const foldersRouter = require('./routes/folders.router');
+const tagsRouter = require('./routes/tags.router');
+const usersRouter = require('./routes/users.router');
+const authRouter = require('./routes/auth.router');
 
 // Create an Express application
 const app = express();
 
-// Log all requests. Skip logging during testing.
+// Log all requests. Skip logging during
 app.use(morgan(process.env.NODE_ENV === 'development' ? 'dev' : 'common', {
   skip: () => process.env.NODE_ENV === 'test'
 }));
 
-// Parse incoming request bodies as JSON
+// Parse request body
 app.use(express.json());
 
 // Mount auth strategies
+passport.use(localStrategy);
+passport.use(jwtStrategy);
 
 // Mount routers
+app.use('/api', authRouter);
+app.use('/api', usersRouter);
+app.use('/api/notes', notesRouter);
+app.use('/api/folders', foldersRouter);
+app.use('/api/tags', tagsRouter);
 
 // Custom 404 Not Found route handler
 app.use((req, res, next) => {
@@ -55,6 +71,5 @@ if (require.main === module) {
     console.error(err);
   });
 }
-
 
 module.exports = app; // Export for testing
