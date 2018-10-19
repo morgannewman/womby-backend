@@ -6,13 +6,15 @@ const Note = require('../models/note');
 // Validation Middleware
 const { constructLocationHeader, constructObject } = require('../middleware/helpers');
 const { requireFields, validateId, validateFolderId, validateTagId, validateMatchingIds } = require('../middleware/validate');
+// For constructing a valid POST document
+const blankDocument = require('../db/blankDocument');
 
 // Protect endpoint
 router.use('/', passport.authenticate('jwt', { session: false, failWithError: true }));
 
 /* ========== GET/READ ALL ITEMS ========== */
 router.get('/', (req, res, next) => {
-  const {folderId, searchTerm, tagId} = req.query;
+  const { folderId, searchTerm, tagId } = req.query;
   const userId = req.user.id;
   // Add relevant filters to query
   let filter = { userId };
@@ -29,7 +31,7 @@ router.get('/', (req, res, next) => {
 router.get('/:id', validateId, (req, res, next) => {
   const id = req.params.id;
   const userId = req.user.id;
-  return Note.findOne({userId, _id: id})
+  return Note.findOne({ userId, _id: id })
     .then(dbResponse => {
       // Verify that a result is returned (ID exists in DB)
       if (!dbResponse) return next();
@@ -40,9 +42,10 @@ router.get('/:id', validateId, (req, res, next) => {
 
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/', validateId, validateFolderId, validateTagId, requireFields(['title']), (req, res, next) => {
-  const availableFields = ['title', 'content', 'folderId', 'tags'];
+  const availableFields = ['title', 'document', 'folderId', 'tags'];
   // Construct the new note
   const newNote = constructObject(availableFields, req);
+  if (!newNote.document) newNote.document = blankDocument;
   return Note.create(newNote)
     .then(dbResponse => {
       // Verify that a result is returned (otherwise throw 500 error)
@@ -54,7 +57,7 @@ router.post('/', validateId, validateFolderId, validateTagId, requireFields(['ti
 
 /* ========== PUT/UPDATE A SINGLE ITEM ========== */
 router.put('/:id', requireFields(['id']), validateId, validateTagId, validateFolderId, validateMatchingIds, (req, res, next) => {
-  const updateFields = ['title', 'content', 'folderId', 'tags'];
+  const updateFields = ['title', 'document', 'folderId', 'tags'];
   const updatedNote = constructObject(updateFields, req);
 
   const id = req.params.id;
