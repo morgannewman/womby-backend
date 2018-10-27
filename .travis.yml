@@ -1,4 +1,9 @@
 language: node_js
-node_js: node
-services: 
+node_js: lts/*
+services:
   - mongodb
+deploy:
+  provider: heroku
+  api_key:
+    secure: VtTLGQYXmsn7LW9YJgTHK0gc8dbbZcYE4Fyh4WqxW/XA0ursBeiS9cIJUplqXKlVZaNWTkHQjHCzco2/OXN3sQuZkZQdSdaGCZ27VWflAQPcgrE7lpy9g8H/6bUbB65tpZz0Iwpdi/gFKLXf9iDW5aLl9kT+xhpVscxx9pOGZjzIq25KdWCD+uw6MKItwwPbB8zxCdTx3KqKdvBoIduHqLBzmQTAP44YS/2t9SWsTNzFSETyL42RSMGd7l5xjaT1Mt8IdZd/8+TX0/rqEmU9fgY8inmExmQoKuBjYyB7/985cdMdV0PP1e9/NUi8v6lwVmiPoDfMdzbLVBKTEaqvI0P6QIL20OsETGL4772KnyZt26QUe3jvwVFkLFUmZQMZqSi9h/muMLcH3Iv2jgLTTiwv4M7ZVOPwjaW9zcE8YW6JH4n+ElSbKADShXig/V6TQPSWGQzVu7IAUdfUpSL4nrPtuVRfAP21tH+BLbB3sGijN/0+v9hdoPRVcjbdmPruAX4L5gyx0UB7pOxN5mPdwMRtcf2IjvVxoKl+YJz6g9ZjltZ3J1UCNcZAxcB5yE6fpQaA5TM3c0J3I3wRhohMm23fgQ9yqA4nmB20aCOYrVbaRpS10Zo/ZrRQKRWkJqYdF7Tfm2Zl7KhMyMtZpb+bVHnIYwKNe9c43pvFgTtULso=
+  app: womby-staging
