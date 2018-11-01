@@ -32,7 +32,7 @@ app.use(
 app.use(helmet());
 app.use(
   cors({
-    origin: "https://womby-staging.firebaseapp.com"
+    origin: process.env.CORS_ORIGIN || "http://localhost:3000"
   })
 );
 app.use(compress());
